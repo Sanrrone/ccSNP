@@ -51,6 +51,9 @@ if [ "$PAIRED" == "false" ]; then
     export READS="$R0"
 fi
 
+if [ $(echo "$READS" | tr ',' '\n' |wc -l) le 1 ];then
+    NOCC="true"
+fi
 
 ###################################################################################################################
 #check quality variable
