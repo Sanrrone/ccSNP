@@ -1,0 +1,2 @@
+# ccSNP
+Call Core SNP
