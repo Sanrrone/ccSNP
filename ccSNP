@@ -1,0 +1,152 @@
+#!/bin/bash
+shopt -s direxpand
+shopt -s expand_aliases
+if [ -f ~/.bashrc ]; then source ~/.bashrc; fi
+if [ -f ~/.bash_profile ]; then source ~/.bash_profile; fi
+if [ -f ~/.bash_alias ]; then source ~/.bash_alias; fi
+
+export CCSNPHOME=$(dirname $(readlink -f ${BASH_SOURCE[0]}))
+export EXTBINARIES="$CCSNPHOME/extbinaries"
+export PATH=$PATH:$EXTBINARIES
+source $CCSNPHOME/modules/checkVariables.sh
+set -e
+#usage: ccSNP -1 reads_R2.fastq -2 reads_R2.fastq -r reference.fasta
+#software requirements
+# FASTQC (better download and create alias), MULTIQC
+# sudo apt install pandoc
+#R packages: DADA2, rmarkdown, rmdformats, DT, dplyr, ggplot2, plotly, stringr, Biostrings
+if [ "$1" == "" ];then
+    printHelp
+fi
+actualfolder=$(pwd)
+POSITIONAL=()
+while [[ $# -gt 0 ]]
+do
+key="$1"
+case $key in
+    -1|--forward|-forward)
+    R1="$2"
+    shift # past argument
+    shift # past value
+    ;;
+    -2|--reverse|-reverse)
+    R2="$2"
+    shift # past argument
+    shift # past value
+    ;;
+    -0|--single|-single)
+    R0="$2"
+    PAIRED="false"
+    shift # past argument
+    shift
+    ;;
+    -r|--reference|-reference)
+    REFERENCE="$2"
+    shift # past argument
+    shift # past value
+    ;;
+    -a|--aligner|-aligner)
+    ALIGNER="$2"
+    shift # past argument
+    shift # past value
+    ;;
+    -c|--caller|-caller)
+    SCALLER="$2"
+    shift # past argument
+    shift # past value
+    ;;
+     -o|-output|--output)
+    OUTPUT="$2"
+    shift # past argument
+    shift # past value
+    ;;
+    -q|-quality|--quality)
+    QUALITY="$2"
+    shift # past argument
+    shift # past value
+    ;;
+    -p|-ploidy|--ploidy)
+    PLOIDY="$2"
+    shift # past argument
+    shift # past value
+    ;;
+    -qc|-qualitycontrol|--qualitycontrol)
+    MAKEQC=true
+    shift # past argument
+    ;;
+    -gc|-gatkcycles|--gatkcycles)
+    GCYCLES="$2"
+    shift # past argument
+    shift # past value
+    ;;
+    -F|-force|--force)
+    FORCE=true
+    shift # past argument
+    ;;
+    -ncc|-nocc|--nocallcore)
+    NOCC=true
+    shift # past argument
+    ;;
+    --debug)
+    DEBUG=true
+    set -ex
+    shift # past argument
+    ;;
+    -h|--help)
+    printHelp
+    ;;
+    *)    # unknown option
+    POSITIONAL+=("$1") # save it in an array for later
+    shift # past argument
+    ;;
+esac
+done
+
+set -- "${POSITIONAL[@]}" # restore positional parameters
+
+if [[ -n $1 ]]; then
+    echo "the following argument lack of parameter: $1"
+    exit
+fi
+
+##########################
+
+checkVariables
+
+##########################
+
+##executing module selected
+
+#       "qc")
+		if [ "$MAKEQC" == "true" ];then
+          source $CCSNPHOME/modules/qc.sh
+          #READS VARIABLE IS MADE IN CHECKVARIABLE FUNCTION, IT TAKE THE R1&R2 OR R0 AFTER CHECKING IF THEIR EXIST
+          qc $READS $REFERENCE
+        fi
+
+ #      "align")
+          source $CCSNPHOME/modules/align.sh
+          align $ALIGNER $READS $REFERENCE $OUTPUT
+        #########################
+        #$BAMFILES is now available. The "align module" export all the bam files available after map steps.
+        #########################
+ #      "filterbam")
+          source $CCSNPHOME/modules/bamprep.sh
+          bamprep $BAMFILES $REFERENCE $OUTPUT
+
+        #########################
+        #$BAMFILES now is updated containing filtered bams
+        #########################
+ #      "snpcall")
+          source $CCSNPHOME/modules/callvariants.sh
+          callvariants $SCALLER $BAMFILES $REFERENCE $OUTPUT $PLOIDY $QUALITY
+
+        ###########################
+        # VCFFILES is now availbale.
+        ###########################
+ #      "callcore")
+        if [ "$NOCC" != "true" ];then
+            source $CCSNPHOME/modules/callcore.sh
+            callcore $VCFFILES
+        fi
+
