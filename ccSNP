@@ -121,6 +121,23 @@ fi
 
 checkVariables
 
+##check output folder
+##########################
+
+
+if [ "$OUTPUT" == "" ];then
+    OUTPUT="ccsnp"
+fi
+
+if [ -d "$OUTPUT" ];then
+    if [ "$FORCE" == "false" ];then
+        echo "$(tput setaf 1)ERROR: $OUTPUT directory already exist or use --force to continue (overwriting)"
+        exit 1   
+    fi
+else
+    mkdir -p $OUTPUT
+fi
+
 ##########################
 
 ##executing module selected
