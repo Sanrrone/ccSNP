@@ -149,6 +149,7 @@ if [ "$ALIGNER" == "" ];then
     ALIGNER="bwa" #default
 
     if ! [ -x "$(command -v bwa)" ]; then
+
         git clone https://github.com/lh3/bwa
         cd bwa && make -j 4
             chmod +x bwa
@@ -218,12 +219,9 @@ do
                 wget https://github.com/broadinstitute/gatk/releases/download/4.1.7.0/gatk-4.1.7.0.zip
                 unzip gatk-4.1.7.0.zip
                 mv gatk-4.1.7.0 $EXTBINARIES/.
+                rm gatk-4.1.7.0.zip
                 alias gatk=$EXTBINARIES/gatk-4.1.7.0/gatk
 
-                alias gatk >/dev/null 2>&1 && 
-                    echo "$(tput setaf 2)gatk found in $(command -v gatk)$(tput sgr0)" \
-                    || \
-                    echo "$(tput setaf 1)ERROR: gatk not installed$(tput sgr0)" && exit 1
 
             else
                 echo "$(tput setaf 2)gatk found in $(command -v gatk)$(tput sgr0)"

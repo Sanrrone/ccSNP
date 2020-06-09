@@ -7,7 +7,7 @@ if [ -f ~/.bash_alias ]; then source ~/.bash_alias; fi
 
 export CCSNPHOME=$(dirname $(readlink -f ${BASH_SOURCE[0]}))
 export EXTBINARIES="$CCSNPHOME/extbinaries"
-export PATH=$PATH:$EXTBINARIES
+export PATH=$PATH:$EXTBINARIES:$EXTBINARIES/*/
 source $CCSNPHOME/modules/checkVariables.sh
 source $CCSNPHOME/modules/align.sh
 source $CCSNPHOME/modules/bamprep.sh
