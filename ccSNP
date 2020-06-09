@@ -9,6 +9,10 @@ export CCSNPHOME=$(dirname $(readlink -f ${BASH_SOURCE[0]}))
 export EXTBINARIES="$CCSNPHOME/extbinaries"
 export PATH=$PATH:$EXTBINARIES
 source $CCSNPHOME/modules/checkVariables.sh
+source $CCSNPHOME/modules/align.sh
+source $CCSNPHOME/modules/bamprep.sh
+source $CCSNPHOME/modules/callvariants.sh
+source $CCSNPHOME/modules/callcore.sh
 set -e
 #usage: ccSNP -1 reads_R2.fastq -2 reads_R2.fastq -r reference.fasta
 #software requirements
@@ -87,6 +91,10 @@ case $key in
     NOCC=true
     shift # past argument
     ;;
+    -ni|-noin|--nointegrate)
+    NOIN=true
+    shift # past argument
+    ;;
     --debug)
     DEBUG=true
     set -ex
@@ -125,20 +133,17 @@ checkVariables
         fi
 
  #      "align")
-          source $CCSNPHOME/modules/align.sh
           align $ALIGNER $READS $REFERENCE $OUTPUT
         #########################
         #$BAMFILES is now available. The "align module" export all the bam files available after map steps.
         #########################
  #      "filterbam")
-          source $CCSNPHOME/modules/bamprep.sh
           bamprep $BAMFILES $REFERENCE $OUTPUT
 
         #########################
         #$BAMFILES now is updated containing filtered bams
         #########################
  #      "snpcall")
-          source $CCSNPHOME/modules/callvariants.sh
           callvariants $SCALLER $BAMFILES $REFERENCE $OUTPUT $PLOIDY $QUALITY
 
         ###########################
@@ -146,7 +151,7 @@ checkVariables
         ###########################
  #      "callcore")
         if [ "$NOCC" != "true" ];then
-            source $CCSNPHOME/modules/callcore.sh
+            
             callcore $VCFFILES
         fi
 

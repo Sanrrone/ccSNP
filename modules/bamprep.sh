@@ -48,17 +48,17 @@ do
    samclip --max 10 --ref $REFERENCE | 
    samtools fixmate -m - - | 
    samtools sort -l 0 -T /tmp --threads $(nproc) -m $mem | 
-   samtools markdup -T /tmp -r -s - - > ${sampleName}.filt.bam
+   samtools markdup -T /tmp -r -s - - > ${sampleName}.bam
 
 
-   samtools index ${sampleName}.filt.bam
+   samtools index ${sampleName}.bam
    #rm -f fixed.bam m*.bam
    rm -f mapped.bam
 done
 
 cd ..
 
-export BAMFILES=$(ls -1 $(pwd)/${OUTPUT}_2-bamprep/*.filt.bam | tr '\n' ',' | sed ' s/,$//g')
+export BAMFILES=$(ls -1 $(pwd)/${OUTPUT}_2-bamprep/*.bam | tr '\n' ',' | sed "s/,$//g")
 
 echo "$(tput setaf 2)ccSNP: bam preparation step done$(tput sgr0)"
 

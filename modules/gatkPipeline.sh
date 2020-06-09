@@ -9,6 +9,7 @@ REF=$1
 BAM=$2
 PLOIDY=$3
 QUALITY=$4
+sampleName=$5
 ITER=0
 
 MemoryAvail=$(cat /proc/meminfo | grep "MemAvailable" | awk '{printf "%.0fG\n",$2/1000/1000}')
@@ -23,11 +24,10 @@ else
 	ABR="ApplyBQSR"
 fi
 re='^[0-9]+$'
-if [[ $5 =~ $re ]]; then ITER=$5; fi
+if [[ $6 =~ $re ]]; then ITER=$6; fi
 if [ "$QUALITY" == "" ];then QUALITY=30; fi
 if [ "$PLOIDY" == "" ] || [ $((PLOIDY)) -lt 0 ] ;then PLOIDY=1; fi
 
-sampleName=$(basename $BAM | sed 's/.bam//g')
 GATKVERSION=$(command -v gatk | awk -F'/' '{gsub("gatk-","",$(NF-1));print $(NF-1)}') 
 if [ "$(printf '%s\n' "4.1.4.0" "$GATKVERSION" | sort -V | head -n1)" == "4.1.4.0" ]; then CONTROVERSIALFLAG="-I"; else CONTROVERSIALFLAG="-F"; fi
 
@@ -36,7 +36,8 @@ if [ "$(printf '%s\n' "4.1.4.0" "$GATKVERSION" | sort -V | head -n1)" == "4.1.4.
  do
 	#step1 get first vairants vcf
 	echo "gatk $HC -R $REF -I $BAM"
-	gatk $HC -R $REF -I $BAM --base-quality-score-threshold $QUALITY --minimum-mapping-quality $QUALITY --read-filter AllowAllReadsReadFilter --sample-ploidy $PLOIDY -O snps.raw.vcf
+	gatk $HC -R $REF -I $BAM --base-quality-score-threshold $QUALITY --minimum-mapping-quality $QUALITY --read-filter AllowAllReadsReadFilter \
+	--sample-ploidy $PLOIDY --min-pruning  3 --native-pair-hmm-threads $(nproc) -O snps.raw.vcf
 
 	#step2 filter variants
 	bcftools view --include 'FMT/GT="1" && QUAL>=100 && FMT/DP>=10' snps.raw.vcf  | 
@@ -58,7 +59,9 @@ if [ "$(printf '%s\n' "4.1.4.0" "$GATKVERSION" | sort -V | head -n1)" == "4.1.4.
 
 
 #BAM now have the corrected bam
-gatk $HC -R $REF -I $BAM --minimum-mapping-quality $QUALITY --read-filter AllowAllReadsReadFilter --sample-ploidy $PLOIDY -O ${sampleName}.raw.vcf
+gatk $HC -R $REF -I $BAM --base-quality-score-threshold $QUALITY --minimum-mapping-quality $QUALITY --read-filter AllowAllReadsReadFilter \
+--sample-ploidy $PLOIDY --min-pruning  3 --native-pair-hmm-threads $(nproc) -O snps.raw.vcf
+
 bcftools view --include 'FMT/GT="1" && QUAL>=100 && FMT/DP>=10 && (FMT/DP)>=0' ${sampleName}.raw.vcf  | 
 bcftools view --types snps |
 vt normalize -r $REF - |

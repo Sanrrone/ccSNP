@@ -1,6 +1,8 @@
 function checkVariables {
 	set -e
     echo "$(tput setaf 2)ccSNP: checking variables and files$(tput sgr0)"
+
+
 ####################################################################################################################
 #paired reads check
 if [ "$PAIRED" == "" ]; then
@@ -51,7 +53,7 @@ if [ "$PAIRED" == "false" ]; then
     export READS="$R0"
 fi
 
-if [ $(echo "$READS" | tr ',' '\n' |wc -l) le 1 ];then
+if [ $(echo "$READS" | tr ',' '\n' | wc -l | awk '{print $1}' ) -le 1 ];then
     NOCC="true"
 fi
 
@@ -69,6 +71,10 @@ fi
 
 ##check output folder
 ##########################
+if [ "$FORCE" == "" ];then
+    FORCE=false
+fi
+
 if [ "$OUTPUT" == "" ];then
     OUTPUT="ccsnp"
 fi
@@ -115,11 +121,33 @@ fi
 
 
 ###################################################################################################################
+
+###### check for WGET
+if ! [ -x "$(command -v wget)" ]; then
+    curl -O https://ftp.gnu.org/gnu/wget/wget2-1.99.2.tar.gz
+    tar xzf wget2-1.99.2.tar.gz
+    cd wget2-1.99.2
+        ./configure --prefix=$EXTBINARIES/wget2-1.99
+        make -j $(nproc)
+        make install
+    cd ..
+    rm -rf wget2-1.99.2.tar.gz wget2-1.99.2
+    alias wget=$EXTBINARIES/wget2-1.99/bin/wget2
+    alias wget >/dev/null 2>&1 && 
+    echo "$(tput setaf 2)wget found in $(command -v wget)$(tput sgr0)" \
+    || \
+    echo "$(tput setaf 1)ERROR: wget not installed$(tput sgr0)" && exit 1
+else
+    echo "$(tput setaf 2)wget found in $(command -v wget)$(tput sgr0)"
+fi
+
 ####################check binaries
 
 ###check for aligners
 if [ "$ALIGNER" == "" ];then
+    
     ALIGNER="bwa" #default
+
     if ! [ -x "$(command -v bwa)" ]; then
         git clone https://github.com/lh3/bwa
         cd bwa && make -j 4
@@ -134,6 +162,7 @@ if [ "$ALIGNER" == "" ];then
         exit 1
     fi
 fi
+
 
 for aligner in $(echo $ALIGNER | tr "," "\n")
 do
@@ -165,7 +194,20 @@ done
 
 ###check for SNP CALLERS
 if [ "$SCALLER" == "" ];then
-    SCALLER="gatk"
+    SCALLER="gatk" #default
+    NOIN="true" #default
+else 
+    if [ "$SCALLER" == "all" ];then
+        SCALLER="freebayes,samtools,gatk" #default
+        NOIN="false" #default
+    fi
+fi
+
+
+if [ $(echo "$SCALLER" | tr ',' '\n' | wc -l) -le 1 ];then
+    NOIN="true"
+else
+    NOIN="false"
 fi
 
 for scaller in $(echo $SCALLER | tr "," "\n")
@@ -178,11 +220,11 @@ do
                 mv gatk-4.1.7.0 $EXTBINARIES/.
                 alias gatk=$EXTBINARIES/gatk-4.1.7.0/gatk
 
-                    if [ "$(whereis gatk)" == "" ]; then
-                            echo "$(tput setaf 1)ERROR: gatk is not installed." >&2
-                            exit 1
-                        
-                    fi
+                alias gatk >/dev/null 2>&1 && 
+                    echo "$(tput setaf 2)gatk found in $(command -v gatk)$(tput sgr0)" \
+                    || \
+                    echo "$(tput setaf 1)ERROR: gatk not installed$(tput sgr0)" && exit 1
+
             else
                 echo "$(tput setaf 2)gatk found in $(command -v gatk)$(tput sgr0)"
                 if [ "GCYCLES" == "" ];then
@@ -196,28 +238,110 @@ do
 
             fi
         ;;
-        samtools|SAMTOOLS|mpileup|SAMtools)
-            if ! [ -x "$(command -v samtools)" ]; then
-                echo "$(tput setaf 1)ERROR: samtools is not installed." >&2
-                exit 1
-            else
-                 echo "$(tput setaf 2)samtools found in $(command -v samtools)$(tput sgr0)"
+        samtools|SAMTOOLS|SAMtools|bcftools|BCFtools)
+            if [ -x "$(command -v bcftools)" ]; then
+                 echo "$(tput setaf 2)bcftools found in $(command -v bcftools)$(tput sgr0)"
             fi
         ;;
         snver|SNVer|SNVER)
             if ! [ -x "$(command -v snver)" ]; then
-                echo "$(tput setaf 1)ERROR: snver is not installed." >&2
-                exit 1
+
+                wget -O snver.tar.gz https://sourceforge.net/projects/snver/files/latest/download
+                mkdir -p snver
+                tar xzf snver.tar.gz -C snver
+                rm -f snver.tar.gz
+                mv snver $EXTBINARIES/.
+                alias snver="java -jar $EXTBINARIES/snver/SNVerIndividual.jar"
+                
+                alias snver >/dev/null 2>&1 && 
+                    echo "$(tput setaf 2)snver found in $(command -v snver)$(tput sgr0)" \
+                    || \
+                    echo "$(tput setaf 1)ERROR: snver not installed$(tput sgr0)" && exit 1
             else
                  echo "$(tput setaf 2)snver found in $(command -v snver)$(tput sgr0)"
             fi
         ;;
-        freebayes|FREEBAYES)
+        freebayes|FREEBAYES|fb|FB|freeb)
             if ! [ -x "$(command -v freebayes)" ]; then
-                echo "$(tput setaf 1)ERROR: freebayes is not installed." >&2
-                exit 1
+
+                if ! [ -x "$(command -v cmake)" ]; then
+                    echo "$(tput setaf 1)cmake not found, you can avoid this installation installing directly freebayes$(tput sgr0)"
+                    exit 1
+                fi
+
+                echo "$(tput setaf 2)ccSNP: downloading and installing freebayes and their all dependencies (I wish it works)$(tput sgr0)"
+
+                wget https://github.com/ekg/freebayes/releases/download/v1.3.1/freebayes-v1.3.1
+                chmod +x freebayes-v1.3.1
+                mv freebayes-v1.3.1 $EXTBINARIES/freebayes
+
+                wget https://raw.githubusercontent.com/ekg/freebayes/master/scripts/fasta_generate_regions.py
+                chmod +x fasta_generate_regions.py
+                mv fasta_generate_regions.py $EXTBINARIES/.
+                
+                wget https://raw.githubusercontent.com/ekg/freebayes/master/scripts/freebayes-parallel
+                chmod +x freebayes-parallel
+                mv freebayes-parallel $EXTBINARIES/.
+
+                wget https://ftp.gnu.org/gnu/parallel/parallel-20200522.tar.bz2
+                tar xjf parallel-20200522.tar.bz2
+                cd parallel-20200522
+                    ./configure --prefix=$EXTBINARIES/parallel-20200522
+                    make -j $(nproc)
+                    make install
+                cd ..
+                rm -rf parallel-20200522*
+                cp $EXTBINARIES/parallel-20200522/bin/parallel $EXTBINARIES/.
+                #alias parallel=$EXTBINARIES/parallel-20200522/bin/parallel
+
+
+                git clone --recursive https://github.com/vcflib/vcflib.git
+                cd vcflib
+                    make -j $(nproc)
+                    cp bin/* $EXTBINARIES/.
+                cd ..
+                rm -rf vcflib
+                wget https://raw.githubusercontent.com/vcflib/vcflib/master/scripts/vcffirstheader
+                chmod +x vcffirstheader
+                mv vcffirstheader $EXTBINARIES/.
+
+
+                if ! [ -x "$(command -v freebayes)" ]; then
+                    echo "$(tput setaf 1)ERROR: freebayes is not installed." >&2
+                    exit 1
+                else
+                    echo "$(tput setaf 2)freebayes found in $(command -v freebayes)$(tput sgr0)"
+                fi
             else
-                 echo "$(tput setaf 2)freebayes found in $(command -v freebayes)$(tput sgr0)"
+                if ! [ -x "$(command -v fasta_generate_regions.py)" ]; then
+                    wget https://raw.githubusercontent.com/ekg/freebayes/master/scripts/fasta_generate_regions.py
+                    chmod +x fasta_generate_regions.py
+                    mv fasta_generate_regions.py $EXTBINARIES/.
+                fi
+                if ! [ -x "$(command -v freebayes-parallel)" ]; then
+                    wget https://raw.githubusercontent.com/ekg/freebayes/master/scripts/freebayes-parallel
+                    chmod +x freebayes-parallel
+                    mv freebayes-parallel $EXTBINARIES/.
+
+                    wget https://ftp.gnu.org/gnu/parallel/parallel-20200522.tar.bz2
+                    tar xjf parallel-20200522.tar.bz2
+                    cd parallel-20200522
+                        ./configure --prefix=$EXTBINARIES/parallel-20200522
+                        make -j $(nproc)
+                        make install
+                    cd ..
+                    rm -rf parallel-20200522*
+                    alias parallel=$EXTBINARIES/parallel-20200522/bin/parallel
+
+                    git clone --recursive https://github.com/vcflib/vcflib.git
+                    cd vcflib
+                        make -j $(nproc)
+                        cp bin/* $EXTBINARIES/.
+                    cd ..
+                    rm -rf vcflib
+                else
+                    echo "$(tput setaf 2)freebayes found in $(command -v freebayes)$(tput sgr0)"
+                fi
             fi
         ;;
     esac

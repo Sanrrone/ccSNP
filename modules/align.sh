@@ -25,11 +25,12 @@ cd $OUTPUT
 			cd reference
 				case $aligner in
 					bwa|BWA)
-						echo "$(tput setaf 2)BWA: indexing for $REFERENCE$(tput sgr0)"
+						echo "$(tput setaf 2)ccSNP: indexing $REFERENCE using BWA$(tput sgr0)"
 						bwa index $REFERENCE
 						#REFIDX=$(echo "$(pwd)/$REFIDX")
 				    ;;
 				    smalt|SMALT)
+						echo "$(tput setaf 2)ccSNP: indexing $REFERENCE using SMALT$(tput sgr0)"
 						refname=$(basename $REFERENCE | awk -F'.' '{for(i=1;i<NF-1;i++){printf("%s.",$i)}printf("%s\n",$i)}')
 						smalt index ${refname} $REFERENCE
 				    ;;
