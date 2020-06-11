@@ -8,6 +8,7 @@ ccSNP will trying to download all the necessary binaries from their sources so t
 * Java
 * cmake
 * Curl
+* libssl-dev
 
 Try run the example and check if it runs without errors. You should have the coreSNP file inside the ccsnp folder and the Elephant in ascii :D.
 
