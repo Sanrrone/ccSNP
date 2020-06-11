@@ -9,6 +9,7 @@ ccSNP will trying to download all the necessary binaries from their sources so t
 * cmake
 * Curl
 * libssl-dev
+*  Python >= 3.7 (setted as python binary)
 
 Try run the example and check if it runs without errors. You should have the coreSNP file inside the ccsnp folder and the Elephant in ascii :D.
 
@@ -17,6 +18,7 @@ Other way try to install by yourselfe the requisites.
 # Requisites
 
 Make sure you have these programs in your PATH variable:
+
 * Samtools >= v1.7
 * BCFtools >= v1.7
 * Freebayes
