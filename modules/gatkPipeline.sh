@@ -54,7 +54,7 @@ if [ "$(printf '%s\n' "4.1.4.0" "$GATKVERSION" | sort -V | head -n1)" == "4.1.4.
 	
 	BAM="recal_cycle${i}_${sampleName}.bam"
 	#delete temporary files
-	rm -f recal_cycle$((i-1))_${sampleName}.bam ${sampleName}.vcf ${sampleName}.vcf.idx snps.raw.vcf snps.raw.vcf.idx
+	rm -f recal_cycle$((i-1))_${sampleName}.bam recal_cycle$((i-1))_${sampleName}.bai ${sampleName}.vcf ${sampleName}.vcf.idx snps.raw.vcf snps.raw.vcf.idx
  done
 
 
