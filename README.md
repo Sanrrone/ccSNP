@@ -32,12 +32,13 @@ Other way try to install by yourselfe the requisites.
 
 * `-1/-2`: for paired end reads, multiple samples can be added separated with ',' e.g. ccSNP -1 sample1_r1.fastq,sample2_r1.fastq -2 sample1_r2.fastq,sample2_r2.fastq
 * `-0`: for single reads, multiple samples can be added separated with ',' e.g. ccSNP -0 sample1.fastq,sample2.fastq,sample3.fastq -r reference.fasta
-* `-r`: reference file in fasta format
-* `-c`: varian Caller to use. By default it will use only bcftools, the options are bcftools, freebayes and gatk. you can select all of some of them separating the option with comma. e.g. ccSNP -0 sample.fastq -r references.fasta -c bcftools,freebayes
-* `--noin`: No Integrate results. By default ccSNP will intersect the results of a sample with diffrent snp callaers, with this option all the results for different callers and same samples are keept and not intersected
-* `--nocc`: No call core. By default ccSNP will calculate the core SNP between all samples, with this option there is no core SNP
+* `-r`: reference file in fasta format.
+* `-c`: varian Caller to use. By default it will use only bcftools, the options are bcftools, freebayes and gatk. you can select all of some of them separating the option with comma. e.g. ccSNP -0 sample.fastq -r references.fasta -c bcftools,freebayes.
+* `-o`: Output folder.
+* `--noin`: No Integrate results. By default ccSNP will intersect the results of a sample with diffrent snp callaers, with this option all the results for different callers and same samples are keept and not intersected.
+* `--nocc`: No call core. By default ccSNP will calculate the core SNP between all samples, with this option there is no core SNP.
 * `--force`: by default if the output folder of the same previous run exist the pipeline stop unless you give the --force flag, this will overwrite files with the same name.
-* `--debug`: show all logs from all steps
+* `--debug`: show all logs from all steps.
 
 # Example
 
