@@ -15,6 +15,7 @@ Other way try to install by yourselfe the requisites.
 
 # Requisites
 
+Make sure you have these programs in your PATH variable:
 * Samtools >= v1.7
 * BCFtools >= v1.7
 * Freebayes
