@@ -152,7 +152,7 @@ cd $OUTPUT
 		if [ "$MAKEQC" == "true" ];then
           source $CCSNPHOME/modules/qc.sh
           #READS VARIABLE IS MADE IN CHECKVARIABLE FUNCTION, IT TAKE THE R1&R2 OR R0 AFTER CHECKING IF THEIR EXIST
-          qc $READS $REFERENCE
+          qc $READS
         fi
 
  #      "align")

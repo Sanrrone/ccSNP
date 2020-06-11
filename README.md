@@ -27,10 +27,10 @@ Make sure you have these programs in your PATH variable:
 
 # Usage
 
-* `ccSNP -1 reads_R2.fastq -2 reads_R2.fastq -r reference.fasta`
+* `ccSNP -1 reads_R1.fastq -2 reads_R2.fastq -r reference.fasta`
 * `ccSNP -0 reads.fastq -r reference.fasta`
-* `ccSNP -1 reads_R2.fastq -2 reads_R2.fastq -r reference.fasta -q 20 -c bcftools,freebayes`
-* `ccSNP -1 reads_R2.fastq -2 reads_R2.fastq -r reference.fasta -c gatk`
+* `ccSNP -1 reads_R1.fastq -2 reads_R2.fastq -r reference.fasta -q 20 -c bcftools,freebayes`
+* `ccSNP -1 reads_R1.fastq -2 reads_R2.fastq -r reference.fasta -c gatk`
 
 ## Available options:
 
@@ -62,3 +62,8 @@ Multiple paired end reads samples with multiple variant call
 
 `./ccSNP -1 example/EC958_R1.fastq,example/MS6573_R1.fastq -2 example/EC958_R2.fastq,example/MS6573_R2.fastq -r example/APECO1.fasta -c samtools,freebayes,gatk`
 
+# Notes
+
+* You can use one, two or three variant callers, is not necessary install all but the intersection of three results is better than only one.
+* ccSNP only deal with SNP. Indels and other type of variant are filtered.
+* Ploidy is set to 1 for all cases
