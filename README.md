@@ -67,3 +67,4 @@ Multiple paired end reads samples with multiple variant call
 * You can use one, two or three variant callers, is not necessary install all but the intersection of three results is better than only one.
 * ccSNP only deal with SNP. Indels and other type of variant are filtered.
 * Ploidy is set to 1 for all cases
+* Filter for post SNP call is performed using DP>=10 and QUAL>=100
