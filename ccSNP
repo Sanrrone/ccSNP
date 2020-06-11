@@ -99,13 +99,16 @@ case $key in
     CLEAN=false
     shift # past argument
     ;;
-    
+    -rqc|--readqc|--rqc|--makeQC|--readQC|-mqc|--mqc)
+    MAKEQC="true"
+    shift
+    ;;
     --debug)
     DEBUG=true
     set -ex
     shift # past argument
     ;;
-    -h|--help)
+    -h|--help|-?)
     printHelp
     ;;
     *)    # unknown option
@@ -152,9 +155,9 @@ cd $OUTPUT
 		if [ "$MAKEQC" == "true" ];then
           source $CCSNPHOME/modules/qc.sh
           #READS VARIABLE IS MADE IN CHECKVARIABLE FUNCTION, IT TAKE THE R1&R2 OR R0 AFTER CHECKING IF THEIR EXIST
-          qc $READS
+          #qc $READS $QUALITY
         fi
-
+#exit
  #      "align")
           align $ALIGNER $READS $REFERENCE $OUTPUT
         #########################

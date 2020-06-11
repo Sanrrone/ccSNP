@@ -30,7 +30,7 @@ if [ "$PAIRED" == "" ]; then
     done
     export READS="$R1;$R2"
 
-    if [ $(echo $READS | awk -F';' '{n1=split($1,r1,",");n2=split($2,r2,",");if(n1 == n2){print "true"}else{print "falsa"}}') == "false" ];then
+    if [ $(echo $READS | awk -F';' '{n1=split($1,r1,",");n2=split($2,r2,",");if(n1 == n2){print "true"}else{print "false"}}') == "false" ];then
         echo "$(tput setaf 1)ERROR: paired reads doesnt match"
         exit 1
     fi
@@ -119,11 +119,11 @@ if ! [ -x "$(command -v wget)" ]; then
     rm -rf wget2-1.99.2.tar.gz wget2-1.99.2
     alias wget=$EXTBINARIES/wget2-1.99/bin/wget2
     alias wget >/dev/null 2>&1 && 
-    echo "$(tput setaf 2)wget found in $(command -v wget)$(tput sgr0)" \
+    echo "$(tput setaf 2)-- wget found in $(command -v wget)$(tput sgr0)" \
     || \
     echo "$(tput setaf 1)ERROR: wget not installed$(tput sgr0)" && exit 1
 else
-    echo "$(tput setaf 2)wget found in $(command -v wget)$(tput sgr0)"
+    echo "$(tput setaf 2)-- wget found in $(command -v wget)$(tput sgr0)"
 fi
 
 ####################check binaries
@@ -158,7 +158,7 @@ do
                 echo "$(tput setaf 1)ERROR: bwa is not installed." >&2
                 exit 1
             else
-                echo "$(tput setaf 2)bwa found in $(command -v bwa)$(tput sgr0)"
+                echo "$(tput setaf 2)-- bwa found in $(command -v bwa)$(tput sgr0)"
             fi
         ;;
         smalt|SMALT)
@@ -166,7 +166,7 @@ do
                 echo "$(tput setaf 1)ERROR: smalt is not installed." >&2
                 exit 1
             else
-                echo "$(tput setaf 2)smalt found in $(command -v smalt)$(tput sgr0)"
+                echo "$(tput setaf 2)-- smalt found in $(command -v smalt)$(tput sgr0)"
             fi
         ;;
         novoalign|NOVOALIGN)
@@ -213,7 +213,7 @@ do
 
 
             else
-                echo "$(tput setaf 2)gatk found in $(command -v gatk)$(tput sgr0)"
+                echo "$(tput setaf 2)-- gatk found in $(command -v gatk)$(tput sgr0)"
                 if [ "GCYCLES" == "" ];then
                     GCYCLES=0
                 fi
@@ -227,7 +227,7 @@ do
         ;;
         samtools|SAMTOOLS|SAMtools|bcftools|BCFtools)
             if [ -x "$(command -v bcftools)" ]; then
-                 echo "$(tput setaf 2)bcftools found in $(command -v bcftools)$(tput sgr0)"
+                 echo "$(tput setaf 2)-- bcftools found in $(command -v bcftools)$(tput sgr0)"
             fi
         ;;
         snver|SNVer|SNVER)
@@ -241,11 +241,11 @@ do
                 alias snver="java -jar $EXTBINARIES/snver/SNVerIndividual.jar"
                 
                 alias snver >/dev/null 2>&1 && 
-                    echo "$(tput setaf 2)snver found in $(command -v snver)$(tput sgr0)" \
+                    echo "$(tput setaf 2)-- snver found in $(command -v snver)$(tput sgr0)" \
                     || \
                     echo "$(tput setaf 1)ERROR: snver not installed$(tput sgr0)" && exit 1
             else
-                 echo "$(tput setaf 2)snver found in $(command -v snver)$(tput sgr0)"
+                 echo "$(tput setaf 2)-- snver found in $(command -v snver)$(tput sgr0)"
             fi
         ;;
         freebayes|FREEBAYES|fb|FB|freeb)
@@ -297,7 +297,7 @@ do
                     echo "$(tput setaf 1)ERROR: freebayes is not installed." >&2
                     exit 1
                 else
-                    echo "$(tput setaf 2)freebayes found in $(command -v freebayes)$(tput sgr0)"
+                    echo "$(tput setaf 2)-- freebayes found in $(command -v freebayes)$(tput sgr0)"
                 fi
             else
                 if ! [ -x "$(command -v fasta_generate_regions.py)" ]; then
@@ -327,7 +327,7 @@ do
                     cd ..
                     rm -rf vcflib
                 else
-                    echo "$(tput setaf 2)freebayes found in $(command -v freebayes)$(tput sgr0)"
+                    echo "$(tput setaf 2)-- freebayes found in $(command -v freebayes)$(tput sgr0)"
                 fi
             fi
         ;;
@@ -350,7 +350,7 @@ else
             exit 1
         fi
     else
-        echo "$(tput setaf 2)fastp found in $(command -v fastp) $(tput sgr0)"
+        echo "$(tput setaf 2)-- fastp found in $(command -v fastp) $(tput sgr0)"
     fi
     MAKEQC=true
 fi
@@ -366,7 +366,7 @@ if ! [ -x "$(command -v samclip)" ]; then
         exit 1
     fi
 else
-     echo "$(tput setaf 2)samclip found in $(command -v samclip) $(tput sgr0)"
+     echo "$(tput setaf 2)-- samclip found in $(command -v samclip) $(tput sgr0)"
 fi
 
 #check samtools
@@ -385,7 +385,7 @@ if ! [ -x "$(command -v samtools)" ]; then
         exit 1
     fi
 else
-     echo "$(tput setaf 2)samtools found in $(command -v samtools) $(tput sgr0)"
+     echo "$(tput setaf 2)-- samtools found in $(command -v samtools) $(tput sgr0)"
 fi
 
 #check bcftools
@@ -405,7 +405,7 @@ if ! [ -x "$(command -v bcftools)" ]; then
         exit 1
     fi
 else
-     echo "$(tput setaf 2)bcftools found in $(command -v bcftools) $(tput sgr0)"
+     echo "$(tput setaf 2)-- bcftools found in $(command -v bcftools) $(tput sgr0)"
 fi
 
 #check vt
@@ -423,25 +423,9 @@ if ! [ -x "$(command -v vt)" ];then
         exit 1
     fi
 else
-     echo "$(tput setaf 2)vt found in $(command -v vt)$(tput sgr0)"
+     echo "$(tput setaf 2)-- vt found in $(command -v vt)$(tput sgr0)"
 fi
 
-##check picard
-#if ! [ -x "$(command -v picard)" ]; then
-#    if [ -f $EXTBINARIES/picard.jar ];then 
-#        echo "$(tput setaf 2)picard found in $EXTBINARIES/picard.jar$(tput sgr0)"
-#        alias picard="java -jar $EXTBINARIES/picard.jar"
-#    else
-#        wget https://github.com/broadinstitute/picard/releases/download/2.22.9/picard.jar
-#        mv picard.jar $EXTBINARIES/.
-#        alias picard="java -jar $EXTBINARIES/picard.jar"
-#    fi
-#
-#    if [ "$(whereis picard.jar)" == "" ]; then
-#        echo "$(tput setaf 1)ERROR: picard is not installed." >&2
-#        exit 1
-#    fi
-#fi
 
 if [ "$CLEAN" == "" ];then
     CLEAN="true"
