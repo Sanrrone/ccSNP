@@ -180,7 +180,7 @@ done
 
 ###check for SNP CALLERS
 if [ "$SCALLER" == "" ];then
-    SCALLER="gatk" #default
+    SCALLER="bcftools" #default
     NOIN="true" #default
 else 
     if [ "$SCALLER" == "all" ];then
