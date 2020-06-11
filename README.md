@@ -1,5 +1,5 @@
 # ccSNP
-Call Core SNP is a pipeline to combine three different variant caller softwares: BCFtools, Freebayes, GATK4. The pipeline take your reads and a reference as input and give you a VCF file with all shared snps between the samples.
+Call Core SNP is a pipeline written in `bash` to combine three different variant caller softwares: BCFtools, Freebayes, GATK4. The pipeline take your reads and a reference as input and give you a VCF file with all shared snps between the samples.
 
 # Try the test before install something
 ccSNP will trying to download all the necessary binaries from their sources so the only requisite you need is have installed:
@@ -40,6 +40,7 @@ Make sure you have these programs in your PATH variable:
 * `-c`: varian Caller to use. By default it will use only bcftools, the options are bcftools, freebayes and gatk. you can select all of some of them separating the option with comma. e.g. ccSNP -0 sample.fastq -r references.fasta -c bcftools,freebayes.
 * `-o`: Output folder.
 * `--noin`: No Integrate results. By default ccSNP will intersect the results of a sample with diffrent snp callaers, with this option all the results for different callers and same samples are keept and not intersected.
+* `-gc`: GATK cycles, The best practices for GATK actually include the base quality recalibration and then the SNP call, with `-gc` flag you can set how much cycles you want. By default is 0.
 * `--nocc`: No call core. By default ccSNP will calculate the core SNP between all samples, with this option there is no core SNP.
 * `--force`: by default if the output folder of the same previous run exist the pipeline stop unless you give the --force flag, this will overwrite files with the same name.
 * `--debug`: show all logs from all steps.
