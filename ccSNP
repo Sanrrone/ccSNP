@@ -95,6 +95,11 @@ case $key in
     NOIN=true
     shift # past argument
     ;;
+    -nc|-noclean|--noclean|--noClean)
+    CLEAN=false
+    shift # past argument
+    ;;
+    
     --debug)
     DEBUG=true
     set -ex
@@ -137,6 +142,7 @@ if [ -d "$OUTPUT" ];then
 else
     mkdir -p $OUTPUT
 fi
+cd $OUTPUT
 
 ##########################
 
@@ -168,9 +174,22 @@ fi
         ###########################
  #      "callcore")
         if [ "$NOCC" != "true" ];then
-            
             callcore $VCFFILES
         fi
+
+        #Gather rresults
+        cp ${OUTPUT}_2-bamprep/*.bam .
+        cp ${OUTPUT}_3-callvariant/*vcf .
+
+        if [ $CLEAN == "true" ];then
+            rm -rf ${OUTPUT}_1-map
+            rm -rf ${OUTPUT}_2-bamprep
+            rm -rf ${OUTPUT}_3-callvariant
+        fi
+
+        #rm -rf $OUTPUT/${OUTPUT}_*
+
+
 
 echo '
          ___     _,.--.,_

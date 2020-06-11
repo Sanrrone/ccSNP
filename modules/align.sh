@@ -7,7 +7,6 @@ REFERENCE=$3
 OUTPUT=$4
 
 REFIDX=$(basename $REFERENCE | awk '{n=split($1,a,".");for(i=1;i<n;i++){if(i<n-1){printf("%s.",a[i])}else{printf("%s",a[i])}};printf "\n"}')
-cd $OUTPUT
 
 	echo "$(tput setaf 2)ccSNP: align step start$(tput sgr0)"
 

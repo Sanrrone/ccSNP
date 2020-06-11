@@ -7,7 +7,10 @@ apt install git
 apt install default-jdk #gatk
 apt install libbz2-dev #samtools
 apt install liblzma-dev #samtools
+apt install libssl-dev #vt
 apt install libcurl4-openssl-dev #samtools
+
+
 
 #mac
 #brew install xz

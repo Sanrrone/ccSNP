@@ -443,6 +443,10 @@ fi
 #    fi
 #fi
 
+if [ "$CLEAN" == "" ];then
+    CLEAN="true"
+fi
+
 echo "$(tput setaf 2)ccSNP: all variables and files looks fine$(tput sgr0)"
 
 }
