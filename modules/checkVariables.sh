@@ -69,23 +69,8 @@ else
     fi
 fi
 
-##check output folder
-##########################
 if [ "$FORCE" == "" ];then
     FORCE=false
-fi
-
-if [ "$OUTPUT" == "" ];then
-    OUTPUT="ccsnp"
-fi
-
-if [ -d "$OUTPUT" ];then
-    if [ "$FORCE" == "false" ];then
-        echo "$(tput setaf 1)ERROR: $OUTPUT directory already exist or use --force to continue (overwriting)"
-        exit 1   
-    fi
-else
-    mkdir -p $OUTPUT
 fi
 
 
@@ -208,7 +193,11 @@ fi
 if [ $(echo "$SCALLER" | tr ',' '\n' | wc -l) -le 1 ];then
     NOIN="true"
 else
-    NOIN="false"
+    if [ "$NOIN" == "" ]; then
+        NOIN="false"
+    else
+        NOIN="true"
+    fi
 fi
 
 for scaller in $(echo $SCALLER | tr "," "\n")
@@ -467,7 +456,7 @@ function recognizeSampleName {
         sampleName=$(echo $R1";"$R2 | awk -F';' '{n1=split($1,r1,"");n2=split($2,r2,"");for(i=1;i<=n1;i++){if(r1[i]==r2[i]){printf("%s",r1[i])}else{break}}printf "\n"}')
         sampleName=$(echo $sampleName | sed "s/_[rR]$//g")
     else
-        sampleName=$(echo $R1 | sed "s/.fastq//g" | sed "s/.gz//g" | sed "s/.zip//g" | sed "s/.bz2//g")
+        sampleName=$(echo $R1 | sed "s/.fastq//g" | sed "s/.gz//g" | sed "s/.zip//g" | sed "s/.bz2//g" )
     fi
 
     echo "$sampleName"
@@ -477,8 +466,16 @@ function recognizeSampleName {
 function printHelp {
     echo "Usage: ccSNP -1 reads_R2.fastq -2 reads_R2.fastq -r reference.fasta"
     echo "Usage: ccSNP -0 reads.fastq -r reference.fasta"
-    echo "Usage: ccSNP -1 reads_R2.fastq -2 reads_R2.fastq -r reference.fasta -q 20 -ploidy 1"
+    echo "Usage: ccSNP -1 reads_R2.fastq -2 reads_R2.fastq -r reference.fasta -q 20 -c bcftools,freebayes"
+    echo "Usage: ccSNP -1 reads_R2.fastq -2 reads_R2.fastq -r reference.fasta -c gatk"
+
     echo -e "\nAvailable options:\n"
+    echo "-1/-2: for paired end reads, multiple samples can be added separated with ',' e.g. ccSNP -1 sample1_r1.fastq,sample2_r1.fastq -2 sample1_r2.fastq,sample2_r2.fastq"
+    echo "-0: for single reads, multiple samples can be added separated with ',' e.g. ccSNP -0 sample1.fastq,sample2.fastq,sample3.fastq -r reference.fasta"
+    echo "-r: reference file in fasta format"
+    echo "-c: varian Caller to use, the options are bcftools, freebayes and gatk. you can select all of some of them separating the option with comma. e.g. ccSNP -0 sample.fastq -r references.fasta -c bcftools,freebayes"
+    echo "--noin: No Integrate results. By default ccSNP will intersect the results of a sample with diffrent snp callaers, with this option all the results for different callers and same samples are keept and not intersected"
+    echo "--nocc: No call core. By default ccSNP will calculate the core SNP between all samples, with this option there is no core SNP"
 
     exit
 }

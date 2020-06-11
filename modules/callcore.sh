@@ -7,15 +7,44 @@ if [ "$OUTPUTNAME" == "" ];then
 	OUTPUTNAME="coreSNP"
 fi 
 
-for vcf in $(echo $VCFFILES | tr ',' '\n')
+#for vcf in $(echo $VCFFILES | tr ',' '\n')
+#do
+#    sampleName=$(basename $vcf | sed 's/.vcf//g')
+#    bcftools view $vcf -Ob -o ${sampleName}.bcf
+#    bcftools index -f --threads "$(nproc)" ${sampleName}.bcf
+#done
+#bcftools merge -Ov -o merged.vcf *.bcf
+#awk -F'\t' '{for(i=9;i<=NF;i++){if($i==".:."){next}};print}' merged.vcf > ${OUTPUTNAME}.vcf
+##mv merged.vcf ${OUTPUTNAME}_all.vcf
+#rm -f *.bcf *.csi merged.vcf
+
+ISEC=$(echo $VCFFILES | tr ',' '\n' | head -n 1)
+sampleName=$(basename $ISEC | sed 's/.vcf//g')
+cleanName=$(bcftools query -l $ISEC)
+bcftools view $ISEC -Ob -o ${sampleName}.bcf
+bcftools index -f --threads "$(nproc)" ${sampleName}.bcf
+if [ "$NOIN" == "false" ]; then rm $ISEC; fi
+
+
+ISEC="${sampleName}.bcf"
+
+for vcf in $(echo $VCFFILES | tr ',' '\n' |awk '{if(NR>1)print}')
 do
     sampleName=$(basename $vcf | sed 's/.vcf//g')
     bcftools view $vcf -Ob -o ${sampleName}.bcf
     bcftools index -f --threads "$(nproc)" ${sampleName}.bcf
+    bcftools isec -Ob $ISEC ${sampleName}.bcf -p .
+    mv 0002.bcf isec.bcf
+    mv 0002.bcf.csi isec.bcf.csi
+    ISEC="isec.bcf"
+    if [ "$NOIN" == "false" ]; then rm $vcf; fi
 done
-bcftools merge -Ov -o merged.vcf *.bcf
-awk -F'\t' '{for(i=9;i<=NF;i++){if($i==".:."){next}};print}' merged.vcf > ${OUTPUTNAME}.vcf
-rm -f *.bcf *.csi merged.vcf
+rm -f ${sampleName}.*.bcf ${sampleName}.*.bcf.csi 000[0123].bcf 000[0123].bcf.csi
+bcftools view $ISEC -Ov -o tmp
+rm -f $ISEC README.txt *.bcf *.bcf.csi
+
+sed "s/${cleanName}/${OUTPUTNAME}/g" tmp > ${OUTPUTNAME}.vcf
+rm -f tmp
 
 }
 

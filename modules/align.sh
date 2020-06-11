@@ -49,7 +49,7 @@ cd $OUTPUT
 					    case $aligner in
 					        bwa|BWA)
 								echo "$(tput setaf 2)BWA: running bwa mem on $reads$(tput sgr0)"
-								bwa mem  -Y -M -R "@RG\tID:${sampleName}\tSM:${sampleName}\tPL:ILLUMINA\tPG:bwa" -t $(nproc) $REFERENCE $reads | samtools view -b -o ${sampleName}.bwa.bam -@ $(nproc)
+								bwa mem  -Y -M -R "@RG\tID:${sampleName}\tSM:${sampleName}\tPL:ILLUMINA\tPG:bwa" -t $(nproc) $REFERENCE $reads | samtools view -b -o ${sampleName}.bam -@ $(nproc)
 					        ;;
 					        smalt|SMALT)
  								smalt map -f sam -o ${sampleName}.smalt.bam -q 10 -n $(nproc) $REFERENCE $reads

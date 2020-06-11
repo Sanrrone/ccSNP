@@ -47,9 +47,16 @@ function callvariants {
  					vt normalize -r $REFERENCE - | 
  					bcftools annotate --remove '^INFO/TYPE,^INFO/DP,^FORMAT/GT,^FORMAT/DP,^FORMAT/GL' > ${sampleName}.bcftools.vcf
 
+ 					#if [ "$NOIN" == "false" ];then #integration will occur
+ 					#	cleanName=$(bcftools query -l ${sampleName}.bcftools.vcf)
+ 					#	sed "s/${cleanName}/${sampleName}_bcftools/g" ${sampleName}.bcftools.vcf > tmp
+ 					#	rm ${sampleName}.bcftools.vcf && mv tmp ${sampleName}.bcftools.vcf
+ 					#fi
+
 			    ;;
 			    freebayes|FREEBAYES|fb|FB|freeb)
 					echo "$(tput setaf 2)ccSNP: running Freebayes $bam$(tput sgr0)"
+
 
 					fasta_generate_regions.py ${REFERENCE}.fai $(awk '{print int($2/31)}' ${REFERENCE}.fai) > ref.txt
 					SECONDS=0
@@ -59,33 +66,40 @@ function callvariants {
 					vt normalize -r $REFERENCE - | 
 					bcftools annotate --remove '^INFO/TYPE,^INFO/DP,^FORMAT/GT,^FORMAT/DP,^FORMAT/GL' > ${sampleName}.freebayes.vcf
 					rm -f ref.txt
+
 			    ;;
 			esac
 		done
 		rm -f *.raw.vcf*
 			
-		if [ "$NOIN" != true ]; then
+		if [ "$NOIN" == "false" ]; then
 
-			ISEC=$(ls ${sampleName}.*.vcf | head -n 1)
-			sampleCallName=$(basename $ISEC | sed 's/.vcf//g')
-			bcftools view $ISEC -Ob -o ${sampleCallName}.bcf
-			bcftools index -f --threads "$(nproc)" ${sampleCallName}.bcf
-			rm $ISEC
-			ISEC="${sampleCallName}.bcf"
-
-			for vcf in $(ls ${sampleName}.*.vcf)
-			do
-			    sampleCallName=$(basename $vcf | sed 's/.vcf//g')
-			    bcftools view $vcf -Ob -o ${sampleCallName}.bcf
-			    bcftools index -f --threads "$(nproc)" ${sampleCallName}.bcf
-			    bcftools isec -Ob ${sampleCallName}.bcf $ISEC -p .
-			    mv 0002.bcf isec.bcf
-			    ISEC="isec.bcf"
-			    rm $vcf
-			done
-			rm -f ${sampleName}.*.bcf ${sampleName}.*.bcf.csi 000[0123].bcf 000[0123].bcf.csi
-			bcftools view $ISEC -Ov -o ${sampleName}.isec.vcf
-			rm -f $ISEC README.txt
+			VCFFILES=$(ls ${sampleName}*.vcf | tr '\n' ',' | sed ' s/,$//g')
+			callcore $VCFFILES ${sampleName}.isec
+			#for vcf in $(echo $VCFFILES | tr ',' '\n')
+			#do
+			#	rm -f $vcf
+			#done
+			#ISEC=$(ls ${sampleName}.*.vcf | head -n 1)
+			#sampleCallName=$(basename $ISEC | sed 's/.vcf//g')
+			#bcftools view $ISEC -Ob -o ${sampleCallName}.bcf
+			#bcftools index -f --threads "$(nproc)" ${sampleCallName}.bcf
+			#rm $ISEC
+			#ISEC="${sampleCallName}.bcf"
+#
+			#for vcf in $(ls ${sampleName}.*.vcf)
+			#do
+			#    sampleCallName=$(basename $vcf | sed 's/.vcf//g')
+			#    bcftools view $vcf -Ob -o ${sampleCallName}.bcf
+			#    bcftools index -f --threads "$(nproc)" ${sampleCallName}.bcf
+			#    bcftools isec -Ob ${sampleCallName}.bcf $ISEC -p .
+			#    mv 0002.bcf isec.bcf
+			#    ISEC="isec.bcf"
+			#    rm $vcf
+			#done
+			#rm -f ${sampleName}.*.bcf ${sampleName}.*.bcf.csi 000[0123].bcf 000[0123].bcf.csi
+			#bcftools view $ISEC -Ov -o ${sampleName}.isec.vcf
+			#rm -f $ISEC README.txt
 		fi
 
 	done
