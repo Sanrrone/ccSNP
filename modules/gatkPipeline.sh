@@ -62,7 +62,7 @@ if [ "$(printf '%s\n' "4.1.4.0" "$GATKVERSION" | sort -V | head -n1)" == "4.1.4.
 gatk $HC -R $REF -I $BAM --base-quality-score-threshold $QUALITY --minimum-mapping-quality $QUALITY --read-filter AllowAllReadsReadFilter \
 --sample-ploidy $PLOIDY --min-pruning  3 --native-pair-hmm-threads $(nproc) -O snps.raw.vcf
 
-bcftools view --include 'FMT/GT="1" && QUAL>=100 && FMT/DP>=10 && (FMT/DP)>=0' ${sampleName}.raw.vcf  | 
+bcftools view --include 'FMT/GT="1" && QUAL>=100 && FMT/DP>=10' snps.raw.vcf  |  
 bcftools view --types snps |
 vt normalize -r $REF - |
 bcftools annotate --remove '^INFO/TYPE,^INFO/DP,^FORMAT/GT,^FORMAT/DP,^FORMAT/GL' > ${sampleName}.gatk.vcf

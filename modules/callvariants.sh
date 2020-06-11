@@ -108,25 +108,3 @@ function callvariants {
 	export VCFFILES=$(ls $(pwd)/${OUTPUT}_3-callvariant/*.vcf | tr '\n' ',' | sed ' s/,$//g')
 	echo "$(tput setaf 2)ccSNP: call variants step done$(tput sgr0)"
 }
-
-#create trusted vcf
-
-
-
-
-#make consensus sequence
-
-#for vcf in $(ls *.vcf)
-#do
-# sampleName=$(basename $vcf | sed 's/.vcf//g')
-# bcftools view $vcf -Oz -o ${sampleName}.bcf
-# bcftools index --threads "$(nproc)" ${sampleName}.bcf
-# REF=$(echo $sampleName | awk -F"_" '{gsub("ref","",$1);print $1".fasta"}')
-# echo "consensus on $REF - $sampleName"
-# bcftools consensus -f ../../2-ref/$REF ${sampleName}.bcf > consensus_${sampleName}.fna
-# sed -i "s/>.*/>${sampleName}/" consensus_${sampleName}.fna
-#done
-
-#statistics
-#for vcf in $(ls *realigned.vcf); do grep -v "#" $vcf |grep INDEL |wc -l; done #for indels
-#for vcf in $(ls *realigned.vcf); do grep -v "#" $vcf |grep -v INDEL |wc -l; done #for snp only
