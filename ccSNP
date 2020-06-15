@@ -74,10 +74,6 @@ case $key in
     shift # past argument
     shift # past value
     ;;
-    -qc|-qualitycontrol|--qualitycontrol)
-    MAKEQC=true
-    shift # past argument
-    ;;
     -gc|-gatkcycles|--gatkcycles)
     GCYCLES="$2"
     shift # past argument
@@ -95,11 +91,11 @@ case $key in
     NOIN=true
     shift # past argument
     ;;
-    -nc|-noclean|--noclean|--noClean)
+    -nc|-noclean|--noclean|--noClean|--nocl|-noc)
     CLEAN=false
     shift # past argument
     ;;
-    -rqc|--readqc|--rqc|--makeQC|--readQC|-mqc|--mqc)
+    -qc|--readqc|--rqc|--makeQC|--readQC|-mqc|--mqc)
     MAKEQC="true"
     shift
     ;;
@@ -155,42 +151,57 @@ cd $OUTPUT
 		if [ "$MAKEQC" == "true" ];then
           source $CCSNPHOME/modules/qc.sh
           #READS VARIABLE IS MADE IN CHECKVARIABLE FUNCTION, IT TAKE THE R1&R2 OR R0 AFTER CHECKING IF THEIR EXIST
-          #qc $READS $QUALITY
+          qc $READS $QUALITY
         fi
-#exit
+
  #      "align")
-          align $ALIGNER $READS $REFERENCE $OUTPUT
+          align $ALIGNER $READS $REFERENCE
         #########################
         #$BAMFILES is now available. The "align module" export all the bam files available after map steps.
         #########################
  #      "filterbam")
-          bamprep $BAMFILES $REFERENCE $OUTPUT
+          bamprep $BAMFILES $REFERENCE
 
         #########################
         #$BAMFILES now is updated containing filtered bams
         #########################
  #      "snpcall")
-          callvariants $SCALLER $BAMFILES $REFERENCE $OUTPUT $PLOIDY $QUALITY
+          callvariants $SCALLER $BAMFILES $REFERENCE $PLOIDY $QUALITY
 
         ###########################
         # VCFFILES is now availbale.
         ###########################
  #      "callcore")
-        if [ "$NOCC" != "true" ];then
+        if [ "$NOCC" == "false" ];then # default value
+            if [ "$NOIN" = "false" ];then #default value is false
+                for vcf in $(ls  3-callvariant/*.isec.vcf | tr ',' '\n')
+                do
+                    sampleName=$(basename $vcf | sed 's/.vcf//g')
+                    bcftools view $vcf -Ob -o ${sampleName}.bcf
+                    bcftools index -f --threads "$(nproc)" ${sampleName}.bcf
+                done
+                bcftools merge -Ov -o all.vcf *.bcf
+                rm -f *.bcf *.csi
+            fi
+            NOIN="true" #set true to dont delete the last files used
             callcore $VCFFILES
         fi
 
-        #Gather rresults
-        cp ${OUTPUT}_2-bamprep/*.bam .
-        cp ${OUTPUT}_3-callvariant/*vcf .
+        ###########################
+        # Gather rresults
+        ##########################
+
+
+
+        #cp 2-bamprep/*.bam .
+        #cp 3-callvariant/*vcf .
 
         if [ $CLEAN == "true" ];then
-            rm -rf ${OUTPUT}_1-map
-            rm -rf ${OUTPUT}_2-bamprep
-            rm -rf ${OUTPUT}_3-callvariant
+            rm -rf 0-qc
+            rm -rf 1-map
+            rm -rf 2-bamprep
+            rm -rf 3-callvariant
         fi
-
-        #rm -rf $OUTPUT/${OUTPUT}_*
 
 
 

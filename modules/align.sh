@@ -4,8 +4,6 @@ set -e
 ALIGNER=$1
 READS=$2
 REFERENCE=$3
-OUTPUT=$4
-
 REFIDX=$(basename $REFERENCE | awk '{n=split($1,a,".");for(i=1;i<n;i++){if(i<n-1){printf("%s.",a[i])}else{printf("%s",a[i])}};printf "\n"}')
 
 	echo "$(tput setaf 2)ccSNP: align step start$(tput sgr0)"
@@ -16,7 +14,7 @@ REFIDX=$(basename $REFERENCE | awk '{n=split($1,a,".");for(i=1;i<n;i++){if(i<n-1
 		REFERENCE=$(echo $(pwd)/$(basename $REFERENCE))
 		samtools faidx $REFERENCE
 	cd ..
-	mkdir -p ${OUTPUT}_1-map
+	mkdir -p 1-map
 
 	for aligner in $(echo $ALIGNER | tr "," "\n")
 	do
@@ -24,12 +22,12 @@ REFIDX=$(basename $REFERENCE | awk '{n=split($1,a,".");for(i=1;i<n;i++){if(i<n-1
 			cd reference
 				case $aligner in
 					bwa|BWA)
-						echo "$(tput setaf 2)ccSNP: indexing $REFERENCE using BWA$(tput sgr0)"
+						echo "$(tput setaf 2)-- indexing $REFERENCE using BWA$(tput sgr0)"
 						bwa index $REFERENCE
 						#REFIDX=$(echo "$(pwd)/$REFIDX")
 				    ;;
 				    smalt|SMALT)
-						echo "$(tput setaf 2)ccSNP: indexing $REFERENCE using SMALT$(tput sgr0)"
+						echo "$(tput setaf 2)-- indexing $REFERENCE using SMALT$(tput sgr0)"
 						refname=$(basename $REFERENCE | awk -F'.' '{for(i=1;i<NF-1;i++){printf("%s.",$i)}printf("%s\n",$i)}')
 						smalt index ${refname} $REFERENCE
 				    ;;
@@ -42,9 +40,13 @@ REFIDX=$(basename $REFERENCE | awk '{n=split($1,a,".");for(i=1;i<n;i++){if(i<n-1
 			################################### Mapping zone
 			echo $READS | awk -F';' '{n=split($1,r1,",");split($2,r2,",");for(i=1;i<=n;i++){print r1[i]"\t"r2[i]}}' | while read R1 R2
 			do
-				sampleName=$(recognizeSampleName $(basename $R1) $(basename $R2))
-				reads="$(readlink -f ../$R1) $(readlink -f ../$R2)"
-					cd ${OUTPUT}_1-map
+				if [ "$R2" == "" ];then
+					sampleName=$(recognizeSampleName $(basename $R1))
+				else
+					sampleName=$(recognizeSampleName $(basename $R1) $(basename $R2))
+				fi
+				reads="$R1 $R2"
+					cd 1-map
 					    case $aligner in
 					        bwa|BWA)
 								echo "$(tput setaf 2)BWA: running bwa mem on $reads$(tput sgr0)"
@@ -62,7 +64,7 @@ REFIDX=$(basename $REFERENCE | awk '{n=split($1,a,".");for(i=1;i<n;i++){if(i<n-1
 	done
 
 
-export BAMFILES=$(ls -1 $(pwd)/${OUTPUT}_1-map/*.bam | tr '\n' ',')
+export BAMFILES=$(ls -1 $(pwd)/1-map/*.bam | tr '\n' ',')
 echo "$(tput setaf 2)ccSNP: align step done$(tput sgr0)"
 
 }

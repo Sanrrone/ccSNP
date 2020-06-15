@@ -42,7 +42,7 @@ if [ "$(printf '%s\n' "4.1.4.0" "$GATKVERSION" | sort -V | head -n1)" == "4.1.4.
 	#step2 filter variants
 	bcftools view --include 'FMT/GT="1" && QUAL>=100 && FMT/DP>=10' snps.raw.vcf  | 
 	vt normalize -r $REF - | 
-	bcftools annotate --remove '^INFO/TYPE,^INFO/DP,^INFO/RO,^INFO/AB,^FORMAT/GT,^FORMAT/DP,^FORMAT/RO,^FORMAT/QR,^FORMAT/QA,^FORMAT/GL' > ${sampleName}.vcf
+	bcftools annotate --remove '^INFO/DP,^INFO/RO,^INFO/AB,^FORMAT/GT,^FORMAT/DP,^FORMAT/RO,^FORMAT/QR,^FORMAT/QA,^FORMAT/GL' > ${sampleName}.vcf
 	gatk IndexFeatureFile $CONTROVERSIALFLAG ${sampleName}.vcf
 
  	#step3 Quality Base Recalibration Table

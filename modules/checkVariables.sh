@@ -28,13 +28,33 @@ if [ "$PAIRED" == "" ]; then
         exit 1
       fi
     done
-    export READS="$R1;$R2"
+    READS="$R1;$R2"
 
     if [ $(echo $READS | awk -F';' '{n1=split($1,r1,",");n2=split($2,r2,",");if(n1 == n2){print "true"}else{print "false"}}') == "false" ];then
         echo "$(tput setaf 1)ERROR: paired reads doesnt match"
         exit 1
     fi
-
+### get full path file
+    fullREADS=$(
+    echo $READS | awk -F';' '{print $1"\t"$2}' | while read R1 R2
+    do
+        for r1 in $(echo $R1 | tr "," "\n")
+        do
+            fullr1=$(readlink -f $r1)
+            fullREADS="${fullREADS}${fullr1},"
+        done
+        
+        fullREADS=$(echo $fullREADS  | sed "s/,$/;/g")
+        
+        for r2 in $(echo $R2 | tr "," "\n")
+        do
+            fullr2=$(readlink -f $r2)
+            fullREADS="${fullREADS}${fullr2},"
+        done
+        fullREADS=$(echo $fullREADS  | sed "s/,$//g")
+        echo $fullREADS
+    done )   
+    export READS="$fullREADS"
 fi
 # single read check
 if [ "$PAIRED" == "false" ]; then
@@ -51,11 +71,26 @@ if [ "$PAIRED" == "false" ]; then
     done
 
     export READS="$R0"
+    ### get full path file
+    fullREADS=""
+    for r0 in $(echo $R0 | tr "," "\n")
+    do
+        fullr0=$(readlink -f $r0)
+        fullREADS="${fullREADS}${fullr0},"
+    done
+    fullREADS=$(echo $fullREADS  | sed "s/,$//g")        
+
+    export READS="$fullREADS"
+
 fi
 
 if [ $(echo "$READS" | tr ',' '\n' | wc -l | awk '{print $1}' ) -le 1 ];then
     NOCC="true"
+else
+    NOCC="false"
 fi
+
+
 
 ###################################################################################################################
 #check quality variable

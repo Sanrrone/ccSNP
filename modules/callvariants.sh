@@ -7,9 +7,8 @@ function callvariants {
 	SCALLER=$1
 	BAMFILES=$2
 	REFERENCE=$3
-	OUTPUT=$4
-	PLOIDY=$5
-	QUALITY=$6
+	PLOIDY=$4
+	QUALITY=$5
 
 
 
@@ -18,8 +17,8 @@ function callvariants {
 		samtools dict $REFERENCE -o ${refname}.dict
 	cd ..
 
-	mkdir -p ${OUTPUT}_3-callvariant
-	cd ${OUTPUT}_3-callvariant
+	mkdir -p 3-callvariant
+	cd 3-callvariant
 
 
 
@@ -32,12 +31,12 @@ function callvariants {
 			
 			case $scaller in
 			    gatk|GATK)
-					echo "$(tput setaf 2)ccSNP: running gatk $bam$(tput sgr0)"
+					echo "$(tput setaf 2)ccSNP: running gatk on $bam$(tput sgr0)"
 					#GCYCLES is defined by ccSNP parameter
 					gatkPipeline $REFERENCE $bam $PLOIDY $QUALITY $sampleName $GCYCLES
 			    ;;
 			    samtools|SAMTOOLS|SAMtools|bcftools|BCFtools)
-					echo "$(tput setaf 2)ccSNP: running BCFtools $bam$(tput sgr0)"
+					echo "$(tput setaf 2)ccSNP: running BCFtools on $bam$(tput sgr0)"
 
  					bcftools mpileup -f $REFERENCE -Ou -q 60 -Q $QUALITY $bam | 
  					bcftools call --ploidy $PLOIDY -mv -Ov > ${sampleName}.raw.vcf
@@ -45,7 +44,7 @@ function callvariants {
  					bcftools view --include 'FMT/GT="1" && QUAL>=100 && DP>=10' ${sampleName}.raw.vcf  | 
  					bcftools view --types snps |
  					vt normalize -r $REFERENCE - | 
- 					bcftools annotate --remove '^INFO/TYPE,^INFO/DP,^FORMAT/GT,^FORMAT/DP,^FORMAT/GL' > ${sampleName}.bcftools.vcf
+ 					bcftools annotate --remove '^FORMAT/GT,^FORMAT/DP' > ${sampleName}.bcftools.vcf
 
  					#if [ "$NOIN" == "false" ];then #integration will occur
  					#	cleanName=$(bcftools query -l ${sampleName}.bcftools.vcf)
@@ -55,7 +54,7 @@ function callvariants {
 
 			    ;;
 			    freebayes|FREEBAYES|fb|FB|freeb)
-					echo "$(tput setaf 2)ccSNP: running Freebayes $bam$(tput sgr0)"
+					echo "$(tput setaf 2)ccSNP: running Freebayes on $bam$(tput sgr0)"
 
 
 					fasta_generate_regions.py ${REFERENCE}.fai $(awk '{print int($2/31)}' ${REFERENCE}.fai) > ref.txt
@@ -64,7 +63,7 @@ function callvariants {
 					bcftools view --include 'FMT/GT="1" && QUAL>=100 && FMT/DP>=10 && (FMT/AO)/(FMT/DP)>=0' ${sampleName}.raw.vcf | 
 					bcftools view --types snps | 
 					vt normalize -r $REFERENCE - | 
-					bcftools annotate --remove '^INFO/TYPE,^INFO/DP,^FORMAT/GT,^FORMAT/DP,^FORMAT/GL' > ${sampleName}.freebayes.vcf
+					bcftools annotate --remove '^INFO/DP,^FORMAT/GT,^FORMAT/GL' > ${sampleName}.freebayes.vcf
 					rm -f ref.txt
 
 			    ;;
@@ -76,35 +75,11 @@ function callvariants {
 
 			VCFFILES=$(ls ${sampleName}*.vcf | tr '\n' ',' | sed ' s/,$//g')
 			callcore $VCFFILES ${sampleName}.isec
-			#for vcf in $(echo $VCFFILES | tr ',' '\n')
-			#do
-			#	rm -f $vcf
-			#done
-			#ISEC=$(ls ${sampleName}.*.vcf | head -n 1)
-			#sampleCallName=$(basename $ISEC | sed 's/.vcf//g')
-			#bcftools view $ISEC -Ob -o ${sampleCallName}.bcf
-			#bcftools index -f --threads "$(nproc)" ${sampleCallName}.bcf
-			#rm $ISEC
-			#ISEC="${sampleCallName}.bcf"
-#
-			#for vcf in $(ls ${sampleName}.*.vcf)
-			#do
-			#    sampleCallName=$(basename $vcf | sed 's/.vcf//g')
-			#    bcftools view $vcf -Ob -o ${sampleCallName}.bcf
-			#    bcftools index -f --threads "$(nproc)" ${sampleCallName}.bcf
-			#    bcftools isec -Ob ${sampleCallName}.bcf $ISEC -p .
-			#    mv 0002.bcf isec.bcf
-			#    ISEC="isec.bcf"
-			#    rm $vcf
-			#done
-			#rm -f ${sampleName}.*.bcf ${sampleName}.*.bcf.csi 000[0123].bcf 000[0123].bcf.csi
-			#bcftools view $ISEC -Ov -o ${sampleName}.isec.vcf
-			#rm -f $ISEC README.txt
 		fi
 
 	done
 
 	cd ..
-	export VCFFILES=$(ls $(pwd)/${OUTPUT}_3-callvariant/*.vcf | tr '\n' ',' | sed ' s/,$//g')
+	export VCFFILES=$(ls $(pwd)/3-callvariant/*.vcf | tr '\n' ',' | sed ' s/,$//g')
 	echo "$(tput setaf 2)ccSNP: call variants step done$(tput sgr0)"
 }
