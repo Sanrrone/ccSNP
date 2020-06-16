@@ -493,10 +493,13 @@ function printHelp {
     echo "Usage: ccSNP -1 reads_R2.fastq -2 reads_R2.fastq -r reference.fasta -c gatk"
 
     echo -e "\nAvailable options:\n"
-    echo "-1/-2: for paired end reads, multiple samples can be added separated with ',' e.g. ccSNP -1 sample1_r1.fastq,sample2_r1.fastq -2 sample1_r2.fastq,sample2_r2.fastq"
-    echo "-0: for single reads, multiple samples can be added separated with ',' e.g. ccSNP -0 sample1.fastq,sample2.fastq,sample3.fastq -r reference.fasta"
+    echo "-1/-2: for paired end reads, multiple samples can be added separated with ','."
+    echo "-0: for single reads, multiple samples can be added separated with ','."
     echo "-r: reference file in fasta format"
-    echo "-c: varian Caller to use, the options are bcftools, freebayes and gatk. you can select all of some of them separating the option with comma. e.g. ccSNP -0 sample.fastq -r references.fasta -c bcftools,freebayes"
+    echo "-c: varian Caller to use, the options are bcftools, freebayes and gatk. you can select all of some of them separating the option with comma. By default is only bcftools."
+    echo "-q: quality for filter reads and SNP quality steps. By default is 20."
+    echo "-gc: GATK cycles for Base Recalibration. By default 0"
+    echo "--noclean: Keep tmp files like the bams and the vcf files before Call the core"
     echo "--noin: No Integrate results. By default ccSNP will intersect the results of a sample with diffrent snp callaers, with this option all the results for different callers and same samples are keept and not intersected"
     echo "--nocc: No call core. By default ccSNP will calculate the core SNP between all samples, with this option there is no core SNP"
 
