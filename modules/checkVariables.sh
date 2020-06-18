@@ -198,8 +198,23 @@ do
         ;;
         smalt|SMALT)
             if ! [ -x "$(command -v smalt)" ]; then
-                echo "$(tput setaf 1)ERROR: smalt is not installed." >&2
-                exit 1
+                wget -O smalt-0.7.6-static.tar.gz http://sourceforge.net/projects/smalt/files/smalt-0.7.6-static.tar.gz/download
+                tar xzf smalt-0.7.6-static.tar.gz
+                cd smalt-0.7.6
+                    ./configure --prefix=$EXTBINARIES/smalt-0.7.6
+                    make -j $(nproc)
+                    make install
+
+                cd ..
+                rm -rf smalt-0.7.6*
+                cp $EXTBINARIES/smalt-0.7.6/bin/* $EXTBINARIES/.
+
+                if ! [ -x "$(command -v smalt)" ]; then
+                    echo "$(tput setaf 1)ERROR: smalt is not installed." >&2
+                    exit 1
+                else
+                    echo "$(tput setaf 2)-- smalt found in $(command -v smalt)$(tput sgr0)"
+                fi
             else
                 echo "$(tput setaf 2)-- smalt found in $(command -v smalt)$(tput sgr0)"
             fi
@@ -313,7 +328,7 @@ do
                     make install
                 cd ..
                 rm -rf parallel-20200522*
-                cp $EXTBINARIES/parallel-20200522/bin/parallel $EXTBINARIES/.
+                cp $EXTBINARIES/parallel-20200522/bin/* $EXTBINARIES/.
                 #alias parallel=$EXTBINARIES/parallel-20200522/bin/parallel
 
 
@@ -388,6 +403,10 @@ else
         echo "$(tput setaf 2)-- fastp found in $(command -v fastp) $(tput sgr0)"
     fi
     MAKEQC=true
+fi
+
+if [ "$CHAIN" == "" ];then
+    CHAIN="true"
 fi
 
 #check samclip

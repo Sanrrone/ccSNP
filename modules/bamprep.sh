@@ -36,7 +36,7 @@ do
    #fi
    #echo "merging bams"
    #samtools merge mapped.bam m*.bam
-   echo "$(tput setaf 2)-- extracting only mapped reads on $bam $(tput sgr0)"
+   echo "$(tput setaf 2)-- extracting mapped reads from $bam $(tput sgr0)"
    
    samtools  view -b -@ $(nproc) -F 260 $bam > mapped.bam
    #picard AddOrReplaceReadGroups I=mapped.bam O=fixed.bam RGID=$sampleName RGLB=foo RGPU=bar RGPL=illumina RGSM=$sampleName CREATE_INDEX=False
@@ -53,11 +53,27 @@ do
    samtools index ${sampleName}.bam
    #rm -f fixed.bam m*.bam
    rm -f mapped.bam
+   if [ "$CHAIN" == "true" ];then #default value
+      echo "$(tput setaf 2)-- extracting unmapped reads from $bam $(tput sgr0)"
+      
+      samtools  view -b -@ $(nproc) -f 260 $bam > unmapped.bam
+
+      samtools sort -n -l 0 -T /tmp --threads $(nproc) -m $mem mapped.bam | 
+      samtools view -h | 
+      samclip --max 10 --invert --ref $REFERENCE > unclipped.bam
+
+      samtools merge ${sampleName}.unmapped.bam unmapped.bam unclipped.bam
+      samtools fastq -@ $(nproc) -0 ${sampleName}.fastq ${sampleName}.unmapped.bam
+
+      rm -f unclipped.bam unmapped.bam ${sampleName}.unmapped.bam
+
+   fi
 done
 
 cd ..
 
 export BAMFILES=$(ls -1 $(pwd)/2-bamprep/*.bam | tr '\n' ',' | sed "s/,$//g")
+export READS=$(ls -1 $(pwd)/2-bamprep/*.fastq | tr '\n' ',' | sed "s/,$//g")
 
 echo "$(tput setaf 2)ccSNP: bam preparation step done$(tput sgr0)"
 
