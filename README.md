@@ -66,3 +66,4 @@ Make sure you have these programs in your PATH variable:
 * ccSNP only deal with SNP. Indels and other type of variant are filtered.
 * Ploidy is set to 1 for all cases
 * Filter for post SNP call is performed using DP>=10 and QUAL>=100
+* All paired end reads are internally merged as first step (after QC if you set the -qc flag)
