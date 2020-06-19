@@ -36,7 +36,7 @@ Make sure you have these programs in your PATH variable:
 `ccSNP -1 reads_R1.fastq -2 reads_R2.fastq -r reference.fasta -q 30 -c bcftools,freebayes`
 ##### Simple paired end reads using GATK as unique variant caller and 2 GATK cycles (base quality recalibration, 0 by default)
 `ccSNP -1 reads_R1.fastq -2 reads_R2.fastq -r reference.fasta -c gatk -gc 2`
-##### Multiple samples paired end reads and perform QC filter on the reads
+##### Multiple samples paired end reads and perform QC reads
 `ccSNP -1 sample1_R1.fastq,sample2_R1.fastq -2 sample1_R2.fastq,sample2_R2.fastq -r reference.fasta -mqc`
 ##### Multiple samples single end reads with all variant callers and keep tmp files (the bams used, the vcf from each variant call, and the intersections)
 `ccSNP -0 sample1.fastq,sample2.fastq,sample3.fastq -r reference.fasta -c all --noclean`

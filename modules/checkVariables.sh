@@ -385,29 +385,31 @@ do
 done
 
 
-#check fastp binary
+
 if [ "$MAKEQC" == "" ];then
     MAKEQC=false
 else
-
-    if ! [ -x "$(command -v fastp)" ]; then
-        wget http://opengene.org/fastp/fastp
-        chmod a+x ./fastp
-        mv fastp $EXTBINARIES/.
-
-        if ! [ -x "$(command -v fastp)" ]; then
-            echo "$(tput setaf 1)ERROR: fastp is not installed." >&2
-            exit 1
-        fi
-    else
-        echo "$(tput setaf 2)-- fastp found in $(command -v fastp) $(tput sgr0)"
-    fi
     MAKEQC=true
 fi
 
 if [ "$CHAIN" == "" ];then
     CHAIN="true"
 fi
+
+#check fastp binary
+if ! [ -x "$(command -v fastp)" ]; then
+    wget http://opengene.org/fastp/fastp
+    chmod a+x ./fastp
+    mv fastp $EXTBINARIES/.
+
+    if ! [ -x "$(command -v fastp)" ]; then
+        echo "$(tput setaf 1)ERROR: fastp is not installed." >&2
+        exit 1
+    fi
+else
+    echo "$(tput setaf 2)-- fastp found in $(command -v fastp) $(tput sgr0)"
+fi
+
 
 #check samclip
 if ! [ -x "$(command -v samclip)" ]; then

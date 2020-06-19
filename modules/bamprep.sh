@@ -67,13 +67,23 @@ do
 
       rm -f unclipped.bam unmapped.bam ${sampleName}.unmapped.bam
 
+      folder_size_kb=`du -k "${sampleName}.fastq" | cut -f1`
+      if [ $folder_size_kb -le 0 ];then
+         rm -f ${sampleName}.fastq
+      fi
+
    fi
 done
 
 cd ..
 
 export BAMFILES=$(ls -1 $(pwd)/2-bamprep/*.bam | tr '\n' ',' | sed "s/,$//g")
-export READS=$(ls -1 $(pwd)/2-bamprep/*.fastq | tr '\n' ',' | sed "s/,$//g")
+
+if [ $(ls -1 $(pwd)/2-bamprep/*.fastq | wc -l ) -gt 0 ];then
+   export READS=$(ls -1 $(pwd)/2-bamprep/*.fastq | tr '\n' ',' | sed "s/,$//g")
+else
+   CHAIN="false"
+fi
 
 echo "$(tput setaf 2)ccSNP: bam preparation step done$(tput sgr0)"
 

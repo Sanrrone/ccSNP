@@ -9,6 +9,9 @@ export CCSNPHOME=$(dirname $(readlink -f ${BASH_SOURCE[0]}))
 export EXTBINARIES="$CCSNPHOME/extbinaries"
 export PATH=$PATH:$EXTBINARIES:$EXTBINARIES/gatk-4.1.7.0/
 source $CCSNPHOME/modules/checkVariables.sh
+source $CCSNPHOME/modules/prepRef.sh
+source $CCSNPHOME/modules/mergeReads.sh
+source $CCSNPHOME/modules/qc.sh
 source $CCSNPHOME/modules/align.sh
 source $CCSNPHOME/modules/bamprep.sh
 source $CCSNPHOME/modules/callvariants.sh
@@ -99,6 +102,10 @@ case $key in
     MAKEQC="true"
     shift
     ;;
+    -nochain|-noch|--noChain|--nochain)
+    CHAIN="false"
+    shift
+    ;;
     --debug)
     DEBUG=true
     set -ex
@@ -152,16 +159,35 @@ cd $OUTPUT
           source $CCSNPHOME/modules/qc.sh
           #READS VARIABLE IS MADE IN CHECKVARIABLE FUNCTION, IT TAKE THE R1&R2 OR R0 AFTER CHECKING IF THEIR EXIST
           qc $READS $QUALITY
+        else
+            if [ "$PAIRED" == "true" ];then
+                mergeReads $READS
+            fi
         fi
+        PAIRED="false" #after qc or merge, paired are no more r1 and r2 just r0
+        
+        mkdir -p reference
+        cd reference
+            cp $REFERENCE .
+            REFERENCE=$(echo $(pwd)/$(basename $REFERENCE))
+            samtools faidx $REFERENCE
+        cd ..
 
  #      "align")
-          align $ALIGNER $READS $REFERENCE
+        for aligner in $(echo "$ALIGNER" | tr ',' '\n')
+        do
+            prepareRef $aligner $REFERENCE
+            align $aligner $READS $REFERENCE
         #########################
         #$BAMFILES is now available. The "align module" export all the bam files available after map steps.
         #########################
  #      "filterbam")
-          bamprep $BAMFILES $REFERENCE
+            bamprep $BAMFILES $REFERENCE
+            if [ "$CHAIN" == "false" ];then #break in the case no more reads can be mapped for the next aligner
+                break
+            fi
 
+        done
         #########################
         #$BAMFILES now is updated containing filtered bams
         #########################
