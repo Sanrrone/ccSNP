@@ -8,6 +8,8 @@ if [ -f ~/.bash_alias ]; then source ~/.bash_alias; fi
 export CCSNPHOME=$(dirname $(readlink -f ${BASH_SOURCE[0]}))
 export EXTBINARIES="$CCSNPHOME/extbinaries"
 export PATH=$PATH:$EXTBINARIES:$EXTBINARIES/gatk-4.1.7.0/
+export PATH=$PATH:~/miniconda3/bin
+
 source $CCSNPHOME/modules/checkVariables.sh
 source $CCSNPHOME/modules/prepRef.sh
 source $CCSNPHOME/modules/mergeReads.sh
