@@ -1,16 +1,6 @@
 # ccSNP
 Call Core SNP is a pipeline written in `bash` to combine three different variant caller softwares: BCFtools, Freebayes, GATK4. The pipeline take your reads and a reference as input and give you a VCF file with all shared snps between the samples.
 
-# Try the test before install something
-ccSNP will trying to download all the necessary binaries from their sources so the only requisite you need is have installed:
-
-* git
-* Java
-* cmake
-* Curl
-* libssl-dev
-* Python >= 3.7 (setted as python binary)
-
 Try run the example and check if it runs without errors. You should have the coreSNP file inside the ccsnp folder and the Elephant in ascii :D.
 
 Other way try to install by yourselfe the requisites.
@@ -67,3 +57,7 @@ Make sure you have these programs in your PATH variable:
 * Ploidy is set to 1 for all cases
 * Filter for post SNP call is performed using DP>=10 and QUAL>=100
 * All paired end reads are internally merged as first step (after QC if you set the -qc flag)
+
+# Next features (future)
+
+* Genbank reference to show affected genes.

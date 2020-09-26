@@ -470,6 +470,7 @@ if ! [ -x "$(command -v vt)" ];then
     tar xzf 0.57721.tar.gz
     cd vt-0.57721
         make -j $(nproc)
+        
         mv vt $EXTBINARIES/.
     cd ..
     rm -rf vt-0.57721 xzf 0.57721.tar.gz
